@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transcript"
+version = "0.1.0"
+description = "MP4 -> MP3 -> 2x -> faster-whisper -> Markdown completo + Markdown refinado, organizado por projeto"
+requires-python = ">=3.11"
+dependencies = [
+  "faster-whisper>=1.1",
+  "imageio-ffmpeg>=0.5",
+  "anthropic>=0.40",
+  "python-dotenv>=1.0",
+  # libs CUDA para a GPU (sem elas o faster-whisper cai para CPU)
+  "nvidia-cublas-cu12; sys_platform == 'linux'",
+  "nvidia-cudnn-cu12; sys_platform == 'linux'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+transcript = "transcript.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

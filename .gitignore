@@ -1,0 +1,18 @@
+# Projeto de referência (cópia local com ~330 MB de vídeos)
+sample/
+
+# Ambiente
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.env
+
+# Dados dos projetos (vídeos, áudios, transcrições) ficam fora do git
+projects/
+*.log
+
+# Mídia solta
+*.mp4
+*.wav
+*.mp3
