@@ -28,7 +28,8 @@ class Settings:
     language: str = "pt"
     speed_factor: float = 2.0
     mp3_bitrate: str = "64k"
-    refine_model: str = "claude-sonnet-5-5"
+    refine_model: str = "claude-opus-5-5"
+    refine_effort: str = "medium"
     refine_chunk_chars: int = 12000
     max_file_chars: int = 40000
 

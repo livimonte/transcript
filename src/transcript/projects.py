@@ -229,8 +229,8 @@ class Project:
     # --- adicionar arquivos -----------------------------------------
     def add_files(self, paths: Iterable[Path | str], *, move: bool = False, link: bool = False) -> list[Item]:
         """`link=True` não copia: cria um link simbólico em 1_input apontando para o original."""
-        # (arquivo, caminho relativo dentro de 1_input)
-        found: list[tuple[Path, Path]] = []
+        # (arquivo, caminho relativo dentro de 1_input, caminho que define as subpastas das saídas)
+        found: list[tuple[Path, Path, Path]] = []
         for raw in paths:
             p = Path(raw)
             if not p.exists():
@@ -238,15 +238,15 @@ class Project:
             if p.is_dir():
                 for f in sorted(p.rglob("*")):
                     if f.is_file() and f.suffix.lower() in EXTENSIONS:
-                        found.append((f, Path(p.name) / f.relative_to(p)))
+                        found.append((f, Path(p.name) / f.relative_to(p), f.relative_to(p)))
             elif p.suffix.lower() in EXTENSIONS:
-                found.append((p, Path(p.name)))
+                found.append((p, Path(p.name), Path(p.name)))
 
         state = self._state()
         entries = state["items"]
         by_source = {e["source"]: s for s, e in entries.items()}
         result: list[Item] = []
-        for src, rel in found:
+        for src, rel, layout in found:
             rel = self._free_rel(src, rel, by_source)
             key = rel.as_posix()
             if key in by_source:  # já adicionado (mesmo conteúdo)
@@ -261,7 +261,7 @@ class Project:
             else:
                 shutil.copy2(src, dest)
             slug = self._unique_slug(
-                "--".join(slugify(part) for part in (*rel.parts[:-1], rel.stem)), entries)
+                "/".join(slugify(part) for part in (*layout.parts[:-1], layout.stem)), entries)
             entries[slug] = {"source": key, "original_name": src.name, "stages": {}}
             by_source[key] = slug
             result.append(self._item_from(slug, entries[slug]))

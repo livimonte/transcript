@@ -23,10 +23,11 @@ class Backend(Protocol):
 class AnthropicBackend:
     """Backend usando o SDK `anthropic`; cliente lazy e retry com backoff exponencial."""
 
-    def __init__(self, model: str, max_tokens: int = 8000, *, max_attempts: int = 5,
+    def __init__(self, model: str, max_tokens: int = 16000, *, effort: str = "medium", max_attempts: int = 5,
                  base_delay: float = 2.0, sleep: Callable[[float], None] = time.sleep):
         self.model = model
         self.max_tokens = max_tokens
+        self.effort = effort  # low|medium|high|xhigh|max; thinking é sempre adaptativo no Opus 5.5
         self.max_attempts = max_attempts
         self.base_delay = base_delay
         self._sleep = sleep
@@ -64,6 +65,8 @@ class AnthropicBackend:
                 msg = client.messages.create(
                     model=self.model,
                     max_tokens=self.max_tokens,
+                    # Opus 5.5: sem temperature/top_p/top_k (400); thinking não pode ser desligado
+                    output_config={"effort": self.effort},
                     system=system,
                     messages=[{"role": "user", "content": user}],
                 )

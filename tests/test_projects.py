@@ -62,21 +62,21 @@ def test_add_files_and_folders(tmp_path):
     (src / "solo.mp3").write_bytes(b"b")
     p = Project.create("p")
     items = p.add_files([src / "aula 1", src / "solo.mp3"])
-    assert sorted(i.slug for i in items) == ["aula-1--parte-2", "solo"]
+    assert sorted(i.slug for i in items) == ["parte-2", "solo"]
     by = {i.slug: i for i in items}
-    it = by["aula-1--parte-2"]
+    it = by["parte-2"]
     assert it.original_name == "Parte 2.MP4"
     assert it.source == p.input_dir / "aula 1" / "Parte 2.MP4" and it.source.read_bytes() == b"a"
     assert (src / "solo.mp3").exists()  # copiado
     assert not (p.input_dir / "aula 1" / "notes.txt").exists()
-    assert it.mp3_1x == p.audio_1x_dir / "aula-1--parte-2.mp3"
-    assert it.mp3_2x == p.audio_2x_dir / "aula-1--parte-2.mp3"
-    assert it.raw_json == p.transcripts_dir / "aula-1--parte-2.json"
-    assert it.md_full == p.markdown_dir / "aula-1--parte-2.md"
-    assert it.md_full_dir == p.markdown_dir / "aula-1--parte-2"
-    assert it.md_refined == p.refined_dir / "aula-1--parte-2.md"
-    assert it.md_refined_dir == p.refined_dir / "aula-1--parte-2"
-    assert [i.slug for i in Project.open("p").items()] == ["aula-1--parte-2", "solo"]
+    assert it.mp3_1x == p.audio_1x_dir / "parte-2.mp3"
+    assert it.mp3_2x == p.audio_2x_dir / "parte-2.mp3"
+    assert it.raw_json == p.transcripts_dir / "parte-2.json"
+    assert it.md_full == p.markdown_dir / "parte-2.md"
+    assert it.md_full_dir == p.markdown_dir / "parte-2"
+    assert it.md_refined == p.refined_dir / "parte-2.md"
+    assert it.md_refined_dir == p.refined_dir / "parte-2"
+    assert [i.slug for i in Project.open("p").items()] == ["parte-2", "solo"]
 
 
 def test_add_move_and_idempotent(tmp_path):
@@ -151,3 +151,17 @@ def test_add_files_link_does_not_copy(tmp_path, monkeypatch):
     assert item.source.is_symlink() and item.source.resolve() == src.resolve()
     assert p.add_files([src], link=True)[0].slug == item.slug  # idempotente
     assert len(p.items()) == 1
+
+
+def test_outputs_mirror_source_subfolders(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRANSCRIPT_HOME", str(tmp_path / "projects"))
+    root = tmp_path / "Vila Verde"
+    for rel in ("Método/Análise 1/Aula 3.mp4", "Método/Análise 1/Aula 4.mp4", "NightGame/Aula 3.mp4"):
+        f = root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(rel.encode())
+    p = Project.create("Vila Verde")
+    items = {i.slug: i for i in p.add_files([root])}
+    assert set(items) == {"metodo/analise-1/aula-3", "metodo/analise-1/aula-4", "nightgame/aula-3"}
+    assert items["metodo/analise-1/aula-3"].mp3_2x == p.audio_2x_dir / "metodo/analise-1/aula-3.mp3"
+    assert items["nightgame/aula-3"].md_refined == p.refined_dir / "nightgame/aula-3.md"

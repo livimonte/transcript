@@ -185,3 +185,24 @@ def test_anthropic_backend_retries(monkeypatch):
     n["c"] = -100  # sempre falha
     with pytest.raises(anthropic.RateLimitError):
         b.complete("s", "u")
+
+
+def test_anthropic_backend_sends_effort_and_no_sampling_params(monkeypatch):
+    from types import SimpleNamespace
+
+    from transcript.refine import AnthropicBackend
+
+    seen = {}
+
+    class FakeMessages:
+        def create(self, **kw):
+            seen.update(kw)
+            return SimpleNamespace(content=[SimpleNamespace(type="text", text="ok")])
+
+    b = AnthropicBackend("claude-opus-5-5")
+    b._client = SimpleNamespace(messages=FakeMessages())
+    assert b.complete("sys", "user") == "ok"
+    assert seen["model"] == "claude-opus-5-5"
+    assert seen["output_config"] == {"effort": "medium"}
+    assert seen["max_tokens"] == 16000
+    assert not {"temperature", "top_p", "top_k", "thinking"} & seen.keys()

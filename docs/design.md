@@ -48,7 +48,7 @@ Compartilhado e já pronto: `models.py` (`Segment`, `Transcript`). **Não altera
 
 ### `config.py` — configuração
 - `load_env()` carrega `.env` (python-dotenv).
-- `@dataclass Settings`: `whisper_model="large-v3"`, `whisper_device="auto"`, `whisper_compute_type="auto"`, `language="pt"`, `speed_factor=2.0`, `mp3_bitrate="64k"`, `refine_model="claude-sonnet-5-5"`, `refine_chunk_chars=12000`, `max_file_chars=40000`.
+- `@dataclass Settings`: `whisper_model="large-v3"`, `whisper_device="auto"`, `whisper_compute_type="auto"`, `language="pt"`, `speed_factor=2.0`, `mp3_bitrate="64k"`, `refine_model="claude-opus-5-5"`, `refine_effort="medium"`, `refine_chunk_chars=12000`, `max_file_chars=40000`.
 - `Settings.from_env(overrides: dict | None)`; valores vêm de env `WHISPER_MODEL`, `REFINE_MODEL` etc.; `project.json` pode sobrescrever.
 
 ### `projects.py` — projetos e estado

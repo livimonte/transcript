@@ -103,3 +103,12 @@ def test_explicit_cuda_failure_raises(tmp_path):
     t = Transcriber(make_settings(whisper_device="cuda"))
     with pytest.raises(RuntimeError):
         t.transcribe(tmp_path / "a.mp3", speed_factor=2.0)
+
+
+def test_find_loops_detects_repeated_segments():
+    from transcript.models import Segment
+    from transcript.transcribe import find_loops
+
+    segs = [Segment(0, 1, "oi")] + [Segment(1 + i * 60, 61 + i * 60, "Como é que começou?") for i in range(7)] + [Segment(500, 501, "fim")]
+    assert find_loops(segs) == [(1, 421, 7)]
+    assert find_loops(segs[:3]) == []

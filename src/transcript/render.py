@@ -12,7 +12,7 @@ from .models import Transcript
 PAUSE_SECONDS = 1.5
 PARAGRAPH_MAX_CHARS = 700
 _SEP = "\n\n"
-_TS_RE = re.compile(r"^\*\*\[((?:\d+:)?\d{2}:\d{2})\]\*\*")
+_TS_RE = re.compile(r"^(?:\*\*|#+ )\[((?:\d+:)?\d{2}:\d{2})\]")  # parágrafo **[mm:ss]** ou título ## [mm:ss]
 
 
 def format_timestamp(seconds: float) -> str:

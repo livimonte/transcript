@@ -38,6 +38,19 @@ def _load_whisper_class():
     return WhisperModel
 
 
+def find_loops(segments: list[Segment], min_repeats: int = 3) -> list[tuple[float, float, int]]:
+    """Sequências de >= min_repeats trechos consecutivos com o mesmo texto (alucinação típica do Whisper)."""
+    loops, i = [], 0
+    while i < len(segments):
+        j = i
+        while j + 1 < len(segments) and segments[j + 1].text.strip() == segments[i].text.strip():
+            j += 1
+        if j - i + 1 >= min_repeats:
+            loops.append((segments[i].start, segments[j].end, j - i + 1))
+        i = j + 1
+    return loops
+
+
 def _log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
 
@@ -86,7 +99,9 @@ class Transcriber:
     # -- transcrição ------------------------------------------------------
     def _run(self, model, audio: Path):
         segments, info = model.transcribe(
-            str(audio), vad_filter=True, language=self._language(), beam_size=5
+            str(audio), vad_filter=True, language=self._language(), beam_size=5,
+            # sem isso o modelo pode entrar em loop repetindo a frase anterior por minutos
+            condition_on_previous_text=False,
         )
         return list(self._consume(segments, info)), info
 
@@ -118,7 +133,8 @@ class Transcriber:
             )
             for s in raw
         ]
-        _log("[whisper] 100%")
+        for start, end, n in find_loops(segments):
+            _log(f"[whisper] AVISO: possível loop de {start:.0f}s a {end:.0f}s ({n} trechos iguais) — confira o áudio")
         return Transcript(
             language=getattr(info, "language", None) or self._language() or "",
             duration=to_original_time(info.duration, speed_factor),

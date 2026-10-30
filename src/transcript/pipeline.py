@@ -103,7 +103,7 @@ def read_markdown(single: Path, parts_dir: Path) -> str:
 def run_refine(project: Project, slugs: Iterable[str] | None = None, *, force: bool = False,
                backend: Backend | None = None, log: Log = _log) -> list[str]:
     s = project.settings
-    backend = backend or AnthropicBackend(s.refine_model)
+    backend = backend or AnthropicBackend(s.refine_model, effort=s.refine_effort)
 
     def outputs(item: Item) -> list[Path]:
         return [item.md_refined if item.md_refined.exists() else item.md_refined_dir / "index.md"]

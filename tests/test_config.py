@@ -14,7 +14,7 @@ def test_defaults(monkeypatch):
     s = Settings.from_env()
     assert s == Settings()
     assert (s.whisper_model, s.language, s.speed_factor, s.mp3_bitrate) == ("large-v3", "pt", 2.0, "64k")
-    assert (s.refine_model, s.refine_chunk_chars, s.max_file_chars) == ("claude-sonnet-5-5", 12000, 40000)
+    assert (s.refine_model, s.refine_chunk_chars, s.max_file_chars) == ("claude-opus-5-5", 12000, 40000)
 
 
 def test_env_and_types(monkeypatch):
