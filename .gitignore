@@ -8,8 +8,10 @@ __pycache__/
 .pytest_cache/
 .env
 
-# Dados dos projetos (vídeos, áudios, transcrições) ficam fora do git
-projects/
+# Dados dos projetos ficam fora do git, exceto os Markdown (completo e refinado)
+projects/*/*
+!projects/*/4_markdown/
+!projects/*/5_refined/
 *.log
 
 # Mídia solta
